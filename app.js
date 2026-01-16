@@ -460,11 +460,7 @@ elNo.addEventListener("click", async () => {
   */
   goTo("start");
 
-  window.addEventListener("keydown", (e) => {
-  if (e.key === "d" || e.key === "D") {
-    elStage.classList.toggle("debug");
-  }
-});
+
 
   /*
     Notes for you to update later
