@@ -1,0 +1,98 @@
+/* styles.css */
+:root {
+  --maxStageWidth: 520px;
+  --bg: #0b0b0f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: #fff;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+.app {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.stage {
+  width: min(100vw, var(--maxStageWidth));
+  position: relative;
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Default stage aspect for Start and Q1 to Q10 images */
+.stage.isFixed {
+  aspect-ratio: 9 / 16;
+}
+
+/* Result screens are long images, allow natural page scroll */
+.stage.isResult {
+  border-radius: 0;
+  width: min(100vw, 720px);
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
+}
+
+.screenImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Hit areas */
+.hit,
+.tapAnywhere {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* Keep buttons invisible but clickable */
+.hit {
+  opacity: 0;
+}
+
+/* Only enabled hits are clickable */
+.hit[disabled],
+.tapAnywhere[disabled] {
+  pointer-events: none;
+}
+
+/* Optional debugging, set to 0.25 temporarily */
+/*
+.hit { opacity: 0.25; background: rgba(255, 0, 0, 0.2); }
+.tapAnywhere { opacity: 0.15; background: rgba(0, 255, 0, 0.2); }
+*/
+
+.tapAnywhere {
+  width: 100%;
+  height: 100%;
+}
+
+/* Prevent weird blue highlight on iOS */
+button {
+  -webkit-tap-highlight-color: transparent;
+}

@@ -1,0 +1,63 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mario Personality Mini Game</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <main id="app" class="app" aria-live="polite">
+      <div id="stage" class="stage" role="application" aria-label="Mini game stage">
+        <img
+          id="screenImage"
+          class="screenImage"
+          alt=""
+          draggable="false"
+          decoding="async"
+          loading="eager"
+        />
+
+        <button
+          id="tapAnywhere"
+          class="tapAnywhere"
+          type="button"
+          aria-label="Tap anywhere to continue"
+        ></button>
+
+        <button
+          id="btnYes"
+          class="hit hitYes"
+          type="button"
+          aria-label="Yes"
+        ></button>
+
+        <button
+          id="btnNo"
+          class="hit hitNo"
+          type="button"
+          aria-label="No"
+        ></button>
+
+        <button
+          id="btnShare"
+          class="hit hitShare"
+          type="button"
+          aria-label="Share result"
+        ></button>
+
+        <button
+          id="btnRestart"
+          class="hit hitRestart"
+          type="button"
+          aria-label="Restart"
+        ></button>
+      </div>
+    </main>
+
+    <noscript>This experience requires JavaScript.</noscript>
+    <script src="app.js"></script>
+  </body>
+</html>
