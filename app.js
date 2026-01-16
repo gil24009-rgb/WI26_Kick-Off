@@ -31,13 +31,13 @@
   */
  const HitBoxes = {
   // Question buttons (based on 1080 x 1920)
-  yes: { x: 0.03, y: 0.179271, w: 0.925000, h: 0.104104 },
-  no: { x: 0.03, y: 0.300104, w: 0.925000, h: 0.104104 },
+  yes: { x: 0.03, y: 0.259271, w: 0.925000, h: 0.104104 },
+  no: { x: 0.03, y: 0.380104, w: 0.925000, h: 0.104104 },
 
   // Result page buttons (based on 1080 x 3700)
   // Using bottom aligned conversion because your Y was given as -28 but buttons are at the bottom
-  share: { x: 0.574074, y: 1.564595, w: 0.459259, h: 0.027838 },
-  restart: { x: 0.3, y: 1.564595, w: 0.434259, h: 0.027838 },
+  share: { x: 0.574074, y: 0.960595, w: 0.459259, h: 0.027838 },
+  restart: { x: 0.3, y: 0.960595, w: 0.434259, h: 0.027838 },
 };
   /*
     Screen graph
