@@ -31,8 +31,8 @@
   */
  const HitBoxes = {
   // Question buttons (based on 1080 x 1920)
-  yes: { x: 0.03, y: 0.02, w: 0.925000, h: 0.104104 },
-  no: { x: 0.03, y: 0.14, w: 0.925000, h: 0.104104 },
+  yes: { x: 0.03, y: 0.179271, w: 0.925000, h: 0.104104 },
+  no: { x: 0.03, y: 0.300104, w: 0.925000, h: 0.104104 },
 
   // Result page buttons (based on 1080 x 3700)
   // Using bottom aligned conversion because your Y was given as -28 but buttons are at the bottom
