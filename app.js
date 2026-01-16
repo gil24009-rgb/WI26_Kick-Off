@@ -31,7 +31,7 @@
   */
  const HitBoxes = {
   // Question buttons (based on 1080 x 1920)
-  yes: { x: 0.031, y: 0.255071, w: 0.925000, h: 0.104104 },
+  yes: { x: 0.031, y: 0.258071, w: 0.925000, h: 0.104104 },
   no: { x: 0.031, y: 0.402004, w: 0.925000, h: 0.104104 },
 
   // Result page buttons (based on 1080 x 3700)
