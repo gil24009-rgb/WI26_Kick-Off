@@ -29,17 +29,13 @@
     You said Yes and No are stacked vertically, so defaults are top and bottom halves.
     You can later adjust these values after measuring coordinates.
   */
-  const HitBoxes = {
-    yes: { x: 0.08, y: 0.35, w: 0.84, h: 0.18 },
-    no: { x: 0.08, y: 0.58, w: 0.84, h: 0.18 },
-
-    // Result page share and restart at bottom left and right
-    // These are relative to the long result image, so keep them near the bottom.
-    // Adjust after you measure.
-    share: { x: 0.52, y: 0.92, w: 0.42, h: 0.07 },
-    restart: { x: 0.06, y: 0.92, w: 0.42, h: 0.07 },
-  };
-
+ const HitBoxes = {
+  yes: { x: 0.002315, y: 0.219271, w: 0.925000, h: 0.104104 },
+  no: { x: 0.0, y: 0.340104, w: 0.925000, h: 0.104104 },
+// Result page buttons (based on 1080 x 3700)
+  share: { x: 0.274074, y: -0.007568, w: 0.459259, h: 0.027838 },
+  restart: { x: -0.181481, y: -0.007568, w: 0.434259, h: 0.027838 },
+};
   /*
     Screen graph
 
