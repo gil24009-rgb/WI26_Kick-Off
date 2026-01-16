@@ -30,11 +30,14 @@
     You can later adjust these values after measuring coordinates.
   */
  const HitBoxes = {
+  // Question buttons (based on 1080 x 1920)
   yes: { x: 0.002315, y: 0.219271, w: 0.925000, h: 0.104104 },
   no: { x: 0.0, y: 0.340104, w: 0.925000, h: 0.104104 },
-// Result page buttons (based on 1080 x 3700)
-  share: { x: 0.274074, y: -0.007568, w: 0.459259, h: 0.027838 },
-  restart: { x: -0.181481, y: -0.007568, w: 0.434259, h: 0.027838 },
+
+  // Result page buttons (based on 1080 x 3700)
+  // Using bottom aligned conversion because your Y was given as -28 but buttons are at the bottom
+  share: { x: 0.274074, y: 0.964595, w: 0.459259, h: 0.027838 },
+  restart: { x: 0.0, y: 0.964595, w: 0.434259, h: 0.027838 },
 };
   /*
     Screen graph
@@ -456,6 +459,12 @@ elNo.addEventListener("click", async () => {
     Start
   */
   goTo("start");
+
+  window.addEventListener("keydown", (e) => {
+  if (e.key === "d" || e.key === "D") {
+    elStage.classList.toggle("debug");
+  }
+});
 
   /*
     Notes for you to update later

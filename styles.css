@@ -40,11 +40,12 @@ body {
 
 /* Result screens are long images, allow natural page scroll */
 .stage.isResult {
-  border-radius: 0;
-  width: min(100vw, 720px);
-  overflow: visible;
-  background: transparent;
-  box-shadow: none;
+  width: min(100vw, var(--maxStageWidth));
+  position: relative;
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 .screenImage {
@@ -95,4 +96,14 @@ body {
 /* Prevent weird blue highlight on iOS */
 button {
   -webkit-tap-highlight-color: transparent;
+}
+
+.stage.debug .hit {
+  opacity: 0.25;
+  background: rgba(255, 0, 0, 0.25);
+}
+
+.stage.debug .tapAnywhere {
+  opacity: 0.12;
+  background: rgba(0, 255, 0, 0.18);
 }
