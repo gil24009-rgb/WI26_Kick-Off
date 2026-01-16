@@ -190,7 +190,7 @@
   */
   const elStage = document.getElementById("stage");
   const elImg = document.getElementById("screenImage");
-
+  const elBgm = document.getElementById("bgm");
   const elTap = document.getElementById("tapAnywhere");
   const elYes = document.getElementById("btnYes");
   const elNo = document.getElementById("btnNo");
@@ -219,6 +219,23 @@
   /*
     Helpers
   */
+
+ let bgmStarted = false;
+
+async function ensureBgm() {
+  if (bgmStarted) return;
+  if (!elBgm) return;
+
+  try {
+    elBgm.volume = 0.6;
+    await elBgm.play();
+    bgmStarted = true;
+  } catch (e) {
+    // Autoplay policy can block play until user gesture
+    // We will try again on the next user action
+  }
+}
+
   function setDisabled(el, disabled) {
     el.disabled = !!disabled;
     el.setAttribute("aria-hidden", disabled ? "true" : "false");
@@ -407,13 +424,21 @@
   /*
     Event wiring
   */
-  elTap.addEventListener("click", () => {
-    if (currentId !== "start") return;
-    goTo(Graph.start.next);
-  });
+  elTap.addEventListener("click", async () => {
+  if (currentId !== "start") return;
+  await ensureBgm();
+  goTo(Graph.start.next);
+});
 
-  elYes.addEventListener("click", () => answerCurrent("A"));
-  elNo.addEventListener("click", () => answerCurrent("B"));
+  elYes.addEventListener("click", async () => {
+  await ensureBgm();
+  answerCurrent("A");
+});
+
+elNo.addEventListener("click", async () => {
+  await ensureBgm();
+  answerCurrent("B");
+});
 
   elShare.addEventListener("click", () => shareResult());
   elRestart.addEventListener("click", () => restart());
