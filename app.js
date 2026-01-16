@@ -36,8 +36,8 @@
 
   // Result page buttons (based on 1080 x 3700)
   // Using bottom aligned conversion because your Y was given as -28 but buttons are at the bottom
-  share: { x: 0.514074, y: 0.934595, w: 0.459259, h: 0.027838 },
-  restart: { x: 0.05, y: 0.934595, w: 0.434259, h: 0.027838 },
+  share: { x: 0.514074, y: 0.944595, w: 0.459259, h: 0.027838 },
+  restart: { x: 0.05, y: 0.944595, w: 0.434259, h: 0.027838 },
 };
   /*
     Screen graph
