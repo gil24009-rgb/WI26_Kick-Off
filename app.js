@@ -17,12 +17,13 @@
     assets/images/cards/Card_Final1.webp ... Card_Final10.webp
   */
 
-  const Paths = {
-    start: "assets/images/start/Start.webp",
-    q: (name) => `assets/images/questions/${name}.webp`,
-    result: (finalIndex) => `assets/images/results/Final${finalIndex}_long.webp`,
-    card: (finalIndex) => `assets/images/cards/Card_Final${finalIndex}.webp`,
-  };
+ const Paths = {
+  start: "assets/images/start/Start.webp",
+  q: (name) => `assets/images/questions/${name}.webp`,
+  result: (finalIndex) => `assets/images/results/Final${finalIndex}_long.webp`,
+  card: (finalIndex) => `assets/images/cards/Card_Final${finalIndex}.webp`,
+  loading: (n) => `assets/images/loading/Loading${n}.webp`,
+};
 
   /*
     Click area positions are percentages, relative to the displayed image box.
@@ -135,6 +136,10 @@
     q10: { type: "dummyEnd", image: Paths.q("Q10"), yes: "result", no: "result", recordKey: "Q10" },
   };
 
+Graph.loading1 = { type: "loading", image: Paths.loading(1) };
+Graph.loading2 = { type: "loading", image: Paths.loading(2) };
+Graph.loading3 = { type: "loading", image: Paths.loading(3) };
+
   /*
     Result mapping
 
@@ -188,18 +193,134 @@
     return finalIndex;
   }
 
-  /*
-    DOM
-  */
-  const elStage = document.getElementById("stage");
-  const elImg = document.getElementById("screenImage");
-  const elBgm = document.getElementById("bgm");
-  const elTap = document.getElementById("tapAnywhere");
-  const elYes = document.getElementById("btnYes");
-  const elNo = document.getElementById("btnNo");
-  const elShare = document.getElementById("btnShare");
-  const elRestart = document.getElementById("btnRestart");
+/*
+  DOM
+*/
+const elStage = document.getElementById("stage");
+const elImg = document.getElementById("screenImage");
 
+const elTap = document.getElementById("tapAnywhere");
+const elYes = document.getElementById("btnYes");
+const elNo = document.getElementById("btnNo");
+const elShare = document.getElementById("btnShare");
+const elRestart = document.getElementById("btnRestart");
+
+// Audio
+const elBgm = document.getElementById("bgm");
+const elSfx1 = document.getElementById("sfx1");
+const elSfx2 = document.getElementById("sfx2");
+const elSfx3 = document.getElementById("sfx3");
+
+let audioUnlocked = false;
+let startSfxPlayed = false;
+let loadingTimer = null;
+
+function stopLoadingTimer() {
+  if (loadingTimer) {
+    clearTimeout(loadingTimer);
+    loadingTimer = null;
+  }
+}
+
+async function tryPlay(el, { volume = 1, restart = true } = {}) {
+  if (!el) return false;
+  try {
+    el.volume = volume;
+    if (restart) el.currentTime = 0;
+    await el.play();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function unlockAudioIfPossible() {
+  if (audioUnlocked) return true;
+
+  // 브라우저 정책상 실패할 수 있음. 실패하면 다음 사용자 입력에서 다시 시도됨.
+  const ok = await tryPlay(elBgm, { volume: 0.6, restart: false });
+  if (ok) {
+    audioUnlocked = true;
+    return true;
+  }
+  return false;
+}
+
+async function playStartSfxThenBgm() {
+  // start 효과음은 1회만
+  if (startSfxPlayed) return;
+
+  // 먼저 오디오 잠금 해제 시도
+  await unlockAudioIfPossible();
+
+  // 효과음1 재생 시도
+  const sfxOk = await tryPlay(elSfx1, { volume: 0.9, restart: true });
+
+  // bgm은 항상 유지되도록 재생 시도
+  await tryPlay(elBgm, { volume: 0.6, restart: false });
+
+  // 효과음이든 bgm이든 한번이라도 성공하면 잠금 해제된 것으로 간주
+  if (sfxOk || (!elBgm || !elBgm.paused)) audioUnlocked = true;
+
+  startSfxPlayed = true;
+}
+
+function playTapSfx() {
+  // 질문 yes no 터치 효과음2
+  // 오디오가 아직 잠겨 있으면 이 시점에서 재시도
+  unlockAudioIfPossible();
+  tryPlay(elSfx2, { volume: 0.75, restart: true });
+  tryPlay(elBgm, { volume: 0.6, restart: false });
+}
+
+function playLoadingSfx() {
+  unlockAudioIfPossible();
+  tryPlay(elSfx3, { volume: 0.85, restart: true });
+  tryPlay(elBgm, { volume: 0.6, restart: false });
+}
+
+function renderLoading(imageSrc) {
+  setStageMode("fixed");
+  elImg.src = imageSrc;
+  elImg.alt = "Loading";
+
+  setDisabled(elTap, true);
+  setDisabled(elYes, true);
+  setDisabled(elNo, true);
+  setDisabled(elShare, true);
+  setDisabled(elRestart, true);
+}
+
+function startLoadingSequenceThenResult() {
+  stopLoadingTimer();
+
+  playLoadingSfx();
+
+  // 0.7초 간격, 사용자 입력 없이 자동 진행
+  const seq = ["loading1", "loading2", "loading3"];
+  let i = 0;
+
+  const step = () => {
+    const id = seq[i];
+    renderLoading(Graph[id].image);
+
+    i += 1;
+    if (i < seq.length) {
+      loadingTimer = setTimeout(step, 700);
+      return;
+    }
+
+    // 마지막 로딩 뒤 결과 계산 후 결과 화면
+    loadingTimer = setTimeout(() => {
+      const coreKey5 = buildCoreKey();
+      const splitKey1 = answers.Q6 || "A";
+      const finalIndex = computeFinalIndex(coreKey5, splitKey1);
+      renderResult(finalIndex);
+    }, 700);
+  };
+
+  step();
+}
   /*
     State
   */
@@ -379,10 +500,11 @@ async function ensureBgm() {
     const next = nextIdForAnswer(node, answerKey);
 
     // If we just answered Q10, go to result
-    if (currentId === "q10") {
-      goTo("result");
-      return;
-    }
+  if (currentId === "q10") {
+  // Q10 이후에는 항상 로딩 화면 3장 자동 재생 후 결과로 이동
+  startLoadingSequenceThenResult();
+  return;
+}
 
     goTo(next);
   }
@@ -427,19 +549,19 @@ async function ensureBgm() {
   /*
     Event wiring
   */
-  elTap.addEventListener("click", async () => {
+elTap.addEventListener("click", async () => {
   if (currentId !== "start") return;
-  await ensureBgm();
+  await playStartSfxThenBgm();
   goTo(Graph.start.next);
 });
 
-  elYes.addEventListener("click", async () => {
-  await ensureBgm();
+elYes.addEventListener("click", () => {
+  playTapSfx();
   answerCurrent("A");
 });
 
-elNo.addEventListener("click", async () => {
-  await ensureBgm();
+elNo.addEventListener("click", () => {
+  playTapSfx();
   answerCurrent("B");
 });
 
@@ -460,7 +582,7 @@ elNo.addEventListener("click", async () => {
   */
   goTo("start");
 
-
+playStartSfxThenBgm();
 
   /*
     Notes for you to update later
