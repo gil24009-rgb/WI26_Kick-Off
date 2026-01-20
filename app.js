@@ -17,12 +17,18 @@
     assets/images/cards/Card_Final1.webp ... Card_Final10.webp
   */
 
- const Paths = {
+const Paths = {
   start: "assets/images/start/Start.webp",
   q: (name) => `assets/images/questions/${name}.webp`,
   result: (finalIndex) => `assets/images/results/Final${finalIndex}_long.webp`,
   card: (finalIndex) => `assets/images/cards/Card_Final${finalIndex}.webp`,
   loading: (n) => `assets/images/loading/Loading${n}.webp`,
+
+  audio: {
+    sfx1: "assets/audio/sfx1.mp3",
+    sfx2: "assets/audio/sfx2.mp3",
+    sfx3: "assets/audio/sfx3.mp3",
+  },
 };
 
   /*
@@ -207,9 +213,116 @@ const elRestart = document.getElementById("btnRestart");
 
 // Audio
 const elBgm = document.getElementById("bgm");
-const elSfx1 = document.getElementById("sfx1");
-const elSfx2 = document.getElementById("sfx2");
-const elSfx3 = document.getElementById("sfx3");
+
+let audioCtx = null;
+let audioReady = false;
+let sfxBuffers = { sfx1: null, sfx2: null, sfx3: null };
+
+function getAudioCtx() {
+  if (!audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    audioCtx = Ctx ? new Ctx() : null;
+  }
+  return audioCtx;
+}
+
+async function fetchAudioBuffer(url) {
+  const ctx = getAudioCtx();
+  if (!ctx) return null;
+  const res = await fetch(url, { cache: "no-store" });
+  const arr = await res.arrayBuffer();
+  return await ctx.decodeAudioData(arr);
+}
+
+async function initAudioOnce() {
+  if (audioReady) return true;
+
+  const ctx = getAudioCtx();
+  if (!ctx) return false;
+
+  try {
+    if (ctx.state !== "running") {
+      await ctx.resume();
+    }
+
+    const [b1, b2, b3] = await Promise.all([
+      fetchAudioBuffer(Paths.audio.sfx1),
+      fetchAudioBuffer(Paths.audio.sfx2),
+      fetchAudioBuffer(Paths.audio.sfx3),
+    ]);
+
+    sfxBuffers.sfx1 = b1;
+    sfxBuffers.sfx2 = b2;
+    sfxBuffers.sfx3 = b3;
+
+    audioReady = true;
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function playSfx(name, volume = 0.9) {
+  const ctx = getAudioCtx();
+  if (!ctx || !audioReady) return;
+
+  const buffer = sfxBuffers[name];
+  if (!buffer) return;
+
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+
+  const gain = ctx.createGain();
+  gain.gain.value = volume;
+
+  source.connect(gain);
+  gain.connect(ctx.destination);
+
+  try {
+    source.start(0);
+  } catch (e) {
+    // ignore
+  }
+}
+
+async function ensureBgmPlaying() {
+  if (!elBgm) return;
+  try {
+    elBgm.volume = 0.6;
+    if (elBgm.paused) {
+      await elBgm.play();
+    }
+  } catch (e) {
+    // autoplay policy can block until user gesture
+  }
+}
+
+async function playStartSfxThenBgm() {
+  if (startSfxPlayed) {
+    await ensureBgmPlaying();
+    return;
+  }
+
+  const ok = await initAudioOnce();
+  if (ok) {
+    playSfx("sfx1", 0.95);
+  }
+
+  await ensureBgmPlaying();
+  startSfxPlayed = true;
+}
+
+async function playTapSfx() {
+  await initAudioOnce();
+  playSfx("sfx2", 0.75);
+  await ensureBgmPlaying();
+}
+
+async function playLoadingSfx() {
+  await initAudioOnce();
+  playSfx("sfx3", 0.85);
+  await ensureBgmPlaying();
+}
 
 let audioUnlocked = false;
 let startSfxPlayed = false;
@@ -291,12 +404,11 @@ function renderLoading(imageSrc) {
   setDisabled(elRestart, true);
 }
 
-function startLoadingSequenceThenResult() {
+async function startLoadingSequenceThenResult() {
   stopLoadingTimer();
 
-  playLoadingSfx();
+  await playLoadingSfx();
 
-  // 0.7초 간격, 사용자 입력 없이 자동 진행
   const seq = ["loading1", "loading2", "loading3"];
   let i = 0;
 
@@ -310,7 +422,6 @@ function startLoadingSequenceThenResult() {
       return;
     }
 
-    // 마지막 로딩 뒤 결과 계산 후 결과 화면
     loadingTimer = setTimeout(() => {
       const coreKey5 = buildCoreKey();
       const splitKey1 = answers.Q6 || "A";
@@ -321,6 +432,7 @@ function startLoadingSequenceThenResult() {
 
   step();
 }
+
   /*
     State
   */
@@ -491,7 +603,7 @@ async function ensureBgm() {
   /*
     Actions
   */
-  function answerCurrent(answerKey) {
+  async function answerCurrent(answerKey) {
     const node = Graph[currentId];
     if (!node) return;
 
@@ -502,7 +614,7 @@ async function ensureBgm() {
     // If we just answered Q10, go to result
   if (currentId === "q10") {
   // Q10 이후에는 항상 로딩 화면 3장 자동 재생 후 결과로 이동
-  startLoadingSequenceThenResult();
+  await startLoadingSequenceThenResult();
   return;
 }
 
@@ -555,13 +667,13 @@ elTap.addEventListener("click", async () => {
   goTo(Graph.start.next);
 });
 
-elYes.addEventListener("click", () => {
-  playTapSfx();
+elYes.addEventListener("click", async () => {
+  await playTapSfx();
   answerCurrent("A");
 });
 
-elNo.addEventListener("click", () => {
-  playTapSfx();
+elNo.addEventListener("click", async () => {
+  await playTapSfx();
   answerCurrent("B");
 });
 
@@ -582,7 +694,6 @@ elNo.addEventListener("click", () => {
   */
   goTo("start");
 
-playStartSfxThenBgm();
 
   /*
     Notes for you to update later
