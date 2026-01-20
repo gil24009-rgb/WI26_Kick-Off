@@ -301,32 +301,42 @@
     renderQuestion(node);
   }
 
-  async function startLoadingSequenceThenResult() {
-    stopLoadingTimer();
-    await playLoadingSfx();
+async function startLoadingSequenceThenResult() {
+  stopLoadingTimer();
+  await playLoadingSfx();
 
-    const seq = ["loading1", "loading2", "loading3"];
-    let i = 0;
+  const seq = ["loading1", "loading2", "loading3"];
 
-    const step = () => {
-      renderLoading(Graph[seq[i]].image);
+  // Set per screen durations in milliseconds
+  // loading1 -> 500ms, loading2 -> 700ms, loading3 -> 1000ms
+  // Change these numbers freely.
+  const durations = [1200, 1200, 1500];
 
-      i += 1;
-      if (i < seq.length) {
-        loadingTimer = setTimeout(step, 700);
-        return;
-      }
+  let i = 0;
 
-      loadingTimer = setTimeout(() => {
-        const coreKey5 = buildCoreKey();
-        const splitKey1 = answers.Q6 || "A";
-        const finalIndex = computeFinalIndex(coreKey5, splitKey1);
-        renderResult(finalIndex);
-      }, 700);
-    };
+  const step = () => {
+    renderLoading(Graph[seq[i]].image);
 
-    step();
-  }
+    const waitMs = durations[i] ?? durations[durations.length - 1] ?? 700;
+
+    i += 1;
+
+    if (i < seq.length) {
+      loadingTimer = setTimeout(step, waitMs);
+      return;
+    }
+
+    // After the last loading screen, wait its duration once more, then show result
+    loadingTimer = setTimeout(() => {
+      const coreKey5 = buildCoreKey();
+      const splitKey1 = answers.Q6 || "A";
+      const finalIndex = computeFinalIndex(coreKey5, splitKey1);
+      renderResult(finalIndex);
+    }, waitMs);
+  };
+
+  step();
+}
 
   async function answerCurrent(answerKey) {
     const node = Graph[currentId];
