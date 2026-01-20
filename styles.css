@@ -98,3 +98,11 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+.screenImage {
+  pointer-events: none;
+}
+
+.tapAnywhere,
+.hit {
+  z-index: 10;
+}
